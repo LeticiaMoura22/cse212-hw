@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 public static class Arrays
 {
     /// <summary>
@@ -13,7 +15,23 @@ public static class Arrays
         // step by step before you write the code. The plan should be clear enough that it could
         // be implemented by another person.
 
-        return []; // replace this return statement with your own
+        /*
+            1ª)A empty list will be created to be constructed latter on 
+            2ª) Loop i from 1 to count (inclusive).
+                2.1) The loop will be : i=1 ; i<= lenght;i++ 
+            3ª) On each iteration, compute startingNumber * i and add it to the array.
+            4ª) Return the array.
+            
+        */
+        var list = new List<double>();
+                                                    
+        for(int i=1; i <= length; i++)
+        {
+            var data = number * i;
+            list.Add(data);
+        }
+
+        return list.ToArray();
     }
 
     /// <summary>
@@ -29,5 +47,33 @@ public static class Arrays
         // Remember: Using comments in your program, write down your process for solving this problem
         // step by step before you write the code. The plan should be clear enough that it could
         // be implemented by another person.
+
+        /*
+            1) Find the cut point: split = data.Count - amount.
+            Everything from `split` to the end is the "tail" and before `split` is the "head".
+
+            2) Use GetRange to copy the two halves into separate lists:
+            tail = data.GetRange(split, amount)   
+            head = data.GetRange(0, split)        
+
+            3) Clear the original list.
+
+            4) Add the tail first, then the head:
+            data.AddRange(tail);
+            data.AddRange(head);        */
+
+        int count = data.Count;
+        int split = count-amount;
+
+        List<int> tail = data.GetRange(split, amount);
+        List<int> head = data.GetRange(0,split);
+
+        data.Clear();
+        data.AddRange(tail);
+        data.AddRange(head);
+
+
+
+
     }
 }
