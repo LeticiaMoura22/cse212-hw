@@ -21,8 +21,26 @@ public static class SetsAndMaps
     /// <param name="words">An array of 2-character words (lowercase, no duplicates)</param>
     public static string[] FindPairs(string[] words)
     {
-        // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
+        // O(n): one pass. For each word, check whether its reverse was already seen.
+        var seen = new HashSet<string>();
+        var results = new List<string>();
+
+        foreach (var word in words)
+        {
+            // Words with identical letters (e.g. "aa") can never form a pair.
+            if (word[0] != word[1])
+            {
+                var reversed = new string(new[] { word[1], word[0] });
+                if (seen.Contains(reversed))
+                {
+                    results.Add($"{reversed} & {word}");
+                }
+            }
+
+            seen.Add(word);
+        }
+
+        return results.ToArray();
     }
 
     /// <summary>
@@ -42,7 +60,20 @@ public static class SetsAndMaps
         foreach (var line in File.ReadLines(filename))
         {
             var fields = line.Split(",");
-            // TODO Problem 2 - ADD YOUR CODE HERE
+            if (fields.Length < 4)
+            {
+                continue; // skip blank / malformed lines
+            }
+
+            var degree = fields[3].Trim();
+            if (degrees.ContainsKey(degree))
+            {
+                degrees[degree]++;
+            }
+            else
+            {
+                degrees[degree] = 1;
+            }
         }
 
         return degrees;
@@ -66,8 +97,33 @@ public static class SetsAndMaps
     /// </summary>
     public static bool IsAnagram(string word1, string word2)
     {
-        // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+        // Count the letters of word1 (ignoring spaces and case), then subtract
+        // the letters of word2. The words are anagrams if every count ends at 0.
+        var counts = new Dictionary<char, int>();
+        var total = 0; // net number of letters still unmatched
+
+        foreach (var ch in word1)
+        {
+            if (ch == ' ') continue;
+            var c = char.ToLowerInvariant(ch);
+            counts[c] = counts.GetValueOrDefault(c) + 1;
+            total++;
+        }
+
+        foreach (var ch in word2)
+        {
+            if (ch == ' ') continue;
+            var c = char.ToLowerInvariant(ch);
+            if (!counts.TryGetValue(c, out var n) || n == 0)
+            {
+                return false; // letter missing or used too many times
+            }
+
+            counts[c] = n - 1;
+            total--;
+        }
+
+        return total == 0;
     }
 
     /// <summary>
@@ -96,11 +152,25 @@ public static class SetsAndMaps
 
         var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, options);
 
-        // TODO Problem 5:
-        // 1. Add code in FeatureCollection.cs to describe the JSON using classes and properties 
-        // on those classes so that the call to Deserialize above works properly.
-        // 2. Add code below to create a string out each place a earthquake has happened today and its magitude.
-        // 3. Return an array of these string descriptions.
-        return [];
+        // The FeatureCollection / Feature / Properties classes (FeatureCollection.cs)
+        // describe the JSON so that Deserialize above works.
+        var results = new List<string>();
+        if (featureCollection?.Features == null)
+        {
+            return results.ToArray();
+        }
+
+        foreach (var feature in featureCollection.Features)
+        {
+            var place = feature?.Properties?.Place ?? "Unknown location";
+            var mag = feature?.Properties?.Mag;
+            // InvariantCulture keeps the decimal point as '.' regardless of the machine's locale.
+            var magText = mag.HasValue
+                ? mag.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                : "N/A";
+            results.Add($"{place} - Mag {magText}");
+        }
+
+        return results.ToArray();
     }
 }
